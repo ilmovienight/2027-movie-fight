@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2027 IL Movie Nights Actor Smackdown</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-hover: #334155;
+      --accent-color: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.3);
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --line-color: #475569;
+      --winner-bg: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: var(--accent-color);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    .bracket-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding: 60px 10px 20px; 
+    }
+
+    .bracket-container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      min-width: 1300px;
+      gap: 35px;
+      position: relative;
+    }
+
+    #connector-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .half-bracket {
+      display: flex;
+      gap: 35px;
+      flex: 1;
+      z-index: 1;
+    }
+
+    .half-bracket.left { flex-direction: row; }
+    .half-bracket.right { flex-direction: row-reverse; }
+
+    .round {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      flex: 1;
+      position: relative;
+      min-height: 650px;
+    }
+
+    .round-title {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* New Wrapper to stack the matchup card and the date */
+    .matchup-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin: 2px 0 5px;
+      z-index: 1;
+    }
+
+    .matchup {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .team {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      user-select: none;
+      transition: background-color 0.2s, color 0.2s;
+      min-height: 36px;
+    }
+
+    .team:first-child {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .team.winner {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .votes {
+      font-size: 0.75rem;
+      color: var(--accent-color);
+      font-weight: bold;
+      min-width: 32px;
+      text-align: center;
+      margin-right: 8px;
+    }
+
+    .name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Small print date below the matchup */
+    .match-date {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+    }
+
+    .center-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 200px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .champion-box {
+      position: absolute;
+      top: 0;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      border: 2px solid var(--accent-color);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      width: 100%;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .champion-box h3 {
+      font-size: 0.85rem;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .champion-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      min-height: 28px;
+    }
+
+    .finals-wrapper {
+      position: relative;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>2027 IL Movie Nights Actor Smackdown</h1>
+    <p>The battle to be the featured actor for next year’s movie night!!</p>
+  </header>
+
+  <div class="bracket-wrapper">
+    <div class="bracket-container" id="bracket"></div>
+  </div>
+
+  <script>
+    const initialJSON = {
+      "leftRegion": [
+        { "name": "Willem Dafoe" }, { "name": "Edward Norton" },
+        { "name": "Ryan Gosling" }, { "name": "Sam Jackson" },
+        { "name": "George Clooney" }, { "name": "Matt Damon" },
+        { "name": "Brad Pitt" }, { "name": "Denzel Washington" },
+        { "name": "Danny DeVito" }, { "name": "Ewan McGregor" },
+        { "name": "Harrison Ford" }, { "name": "Leo DiCaprio" },
+        { "name": "Nick Cage" }, { "name": "Robin Williams" },
+        { "name": "Morgan Freeman" }, { "name": "Tom Cruise" }
+      ],
+      "rightRegion": [
+        { "name": "Meryl Streep" }, { "name": "Cate Blanchett" },
+        { "name": "Rachel McAdams" }, { "name": "Amy Adams" },
+        { "name": "Julianne Moore" }, { "name": "Emily Blunt" },
+        { "name": "Kirsten Dunst" }, { "name": "Glenn Close" },
+        { "name": "Frances McDormand" }, { "name": "Natalie Portman" },
+        { "name": "Toni Collette" }, { "name": "Emma Stone" },
+        { "name": "Anne Hathaway" }, { "name": "Laura Dern" },
+        { "name": "Julia Roberts" }, { "name": "Charlize Theron" }
+      ]
+    };
+
+    // New JSON determining the dates shown below each matchup 
+    // Structured to match the bracket dimensions (R1: 8 matches, R2: 4, R3: 2, R4: 1)
+    const datesJSON = {
+      "left": [
+        [
+          "Fight 1: Week 1",
+          "Fight 2: Week 2",
+          "Fight 3: Week 3",
+          "Fight 4: Week 4",
+          "Fight 5: Week 1",
+          "Fight 6: Week 2",
+          "Fight 7: Week 3",
+          "Fight 8: Week 4"
+        ],
+        [
+          "Fight 17: Week 5",
+          "Fight 18: Week 6",
+          "Fight 19: Week 5",
+          "Fight 20: Week 6"
+        ],
+        [
+          "Fight 25: Oct 12 - Oct 13",
+          "Fight 26: Oct 14 - Oct 15"
+        ],
+        [
+          "Fight 29: Oct 26 - 27"
+        ]
+      ],
+      "right": [
+        [
+          "Fight 9: Week 1",
+          "Fight 10: Week 2",
+          "Fight 11: Week 3",
+          "Fight 12: Week 4",
+          "Fight 13: Week 1",
+          "Fight 14: Week 2",
+          "Fight 15: Week 3",
+          "Fight 16: Week 4"
+        ],
+        [
+          "Fight 21: Week 5",
+          "Fight 22: Week 6",
+          "Fight 23: Week 5",
+          "Fight 24: Week 6"
+        ],
+        [
+          "Fight 27: Oct 12 - Oct 13",
+          "Fight 28: Oct 14 - Oct 15"
+        ],
+        [
+          "Fight 30: Oct 28 - 29"
+        ]
+      ],
+      "finals": [
+        [
+          "Fight 31: Oct 30 - Halloween Show!"
+        ]
+      ]
+    };
+
+    let state = {};
+
+    function initBracket() {
+      state = {
+        left: [[], [], [], []],
+        right: [[], [], [], []],
+        finals: [{ team1: null, team2: null, winner: null }],
+        champion: null
+      };
+
+      for (let i = 0; i < 16; i += 2) {
+        state.left[0].push({
+          team1: { name: initialJSON.leftRegion[i].name, votes: undefined },
+          team2: { name: initialJSON.leftRegion[i + 1].name, votes: undefined },
+          winner: null
+        });
+        state.right[0].push({
+          team1: { name: initialJSON.rightRegion[i].name, votes: undefined },
+          team2: { name: initialJSON.rightRegion[i + 1].name, votes: undefined },
+          winner: null
+        });
+      }
+
+      [4, 2, 1].forEach((count, idx) => {
+        for (let i = 0; i < count; i++) {
+          state.left[idx + 1].push({ team1: null, team2: null, winner: null });
+          state.right[idx + 1].push({ team1: null, team2: null, winner: null });
+        }
+      });
+
+      render();
+    }
+
+    window.vote = function(side, roundIdx, matchIdx, selectedTeam, votes) {
+      if (!selectedTeam) {
+        console.error("Please provide a valid team object or team name string.");
+        return;
+      }
+
+      const match = side === 'finals' ? state.finals[0] : state[side][roundIdx][matchIdx];
+      if (!match) {
+        console.error("Matchup not found.");
+        return;
+      }
+
+      const teamName = typeof selectedTeam === 'string' ? selectedTeam : selectedTeam.name;
+
+      const isTeam1 = match.team1 && match.team1.name === teamName;
+      const isTeam2 = match.team2 && match.team2.name === teamName;
+
+      if (isTeam1) {
+        match.team1.votes = votes;
+      } else if (isTeam2) {
+        match.team2.votes = votes;
+      } else {
+        console.error("Team '" + teamName + "' not found in this matchup.");
+        return;
+      }
+
+      if (match.team1 && match.team2 && match.team1.votes !== undefined && match.team2.votes !== undefined) {
+        if (match.team1.votes > match.team2.votes) {
+          match.winner = match.team1;
+        } else if (match.team2.votes > match.team1.votes) {
+          match.winner = match.team2;
+        } else {
+          console.warn("Ties are not allowed. Provide a decisive vote!");
+          match.winner = null; 
+        }
+
+        if (match.winner) {
+          if (side === 'finals') {
+            state.finals[0].winner = match.winner;
+            state.champion = match.winner;
+          } else {
+            clearDownstream(side, roundIdx, matchIdx);
+            
+            const nextRound = roundIdx + 1;
+            const advancedTeam = { name: match.winner.name, votes: undefined }; 
+
+            if (nextRound < 4) {
+              const nextMatchIdx = Math.floor(matchIdx / 2);
+              const isSlot1 = matchIdx % 2 === 0;
+              if (isSlot1) {
+                state[side][nextRound][nextMatchIdx].team1 = advancedTeam;
+              } else {
+                state[side][nextRound][nextMatchIdx].team2 = advancedTeam;
+              }
+            } else {
+              if (side === 'left') {
+                state.finals[0].team1 = advancedTeam;
+              } else {
+                state.finals[0].team2 = advancedTeam;
+              }
+            }
+          }
+        }
+      }
+      render();
+    };
+
+    function clearDownstream(side, roundIdx, matchIdx) {
+      let currentRound = roundIdx + 1;
+      let currentMatchIdx = Math.floor(matchIdx / 2);
+      let prevMatchIdx = matchIdx;
+
+      while (currentRound < 4) {
+        const match = state[side][currentRound][currentMatchIdx];
+        match.winner = null;
+        
+        const isSlot1 = prevMatchIdx % 2 === 0;
+        if (isSlot1) match.team1 = null; 
+        else match.team2 = null;
+
+        prevMatchIdx = currentMatchIdx;
+        currentMatchIdx = Math.floor(currentMatchIdx / 2);
+        currentRound++;
+      }
+
+      if (state.finals[0].winner) {
+        state.finals[0].winner = null;
+        state.champion = null;
+      }
+      
+      if (currentRound === 4) {
+        if (side === 'left') state.finals[0].team1 = null;
+        else state.finals[0].team2 = null;
+      }
+    }
+
+    function renderMatchup(match, side, roundIdx, matchIdx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'matchup-wrapper';
+
+      const matchDiv = document.createElement('div');
+      matchDiv.className = 'matchup';
+      matchDiv.dataset.side = side;
+      matchDiv.dataset.round = roundIdx;
+      matchDiv.dataset.match = matchIdx;
+
+      [match.team1, match.team2].forEach((team) => {
+        const teamDiv = document.createElement('div');
+        teamDiv.className = `team ${match.winner && team && match.winner.name === team.name ? 'winner' : ''}`;
+
+        if (team) {
+          const votesDisplay = team.votes !== undefined ? team.votes : '-';
+          teamDiv.innerHTML = `<span class="votes">${votesDisplay}</span><span class="name">${team.name}</span>`;
+        } else {
+          teamDiv.innerHTML = `<span class="votes">-</span><span class="name" style="color:var(--text-muted)">TBD</span>`;
+        }
+        matchDiv.appendChild(teamDiv);
+      });
+
+      wrapper.appendChild(matchDiv);
+
+      // Append the small print date below the box
+      const dateText = datesJSON[side] && datesJSON[side][roundIdx] && datesJSON[side][roundIdx][matchIdx] 
+                       ? datesJSON[side][roundIdx][matchIdx] 
+                       : "TBD";
+
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'match-date';
+      dateDiv.innerText = dateText;
+      wrapper.appendChild(dateDiv);
+
+      return wrapper;
+    }
+
+    function renderHalf(side) {
+      const halfDiv = document.createElement('div');
+      halfDiv.className = `half-bracket ${side}`;
+
+      const roundNames = ["Round 1", "Sweet 16", "Quarterfinal", "Semi-Final"];
+
+      state[side].forEach((round, roundIdx) => {
+        const roundDiv = document.createElement('div');
+        roundDiv.className = 'round';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'round-title';
+        titleDiv.innerText = roundNames[roundIdx];
+        roundDiv.appendChild(titleDiv);
+
+        round.forEach((match, matchIdx) => {
+          roundDiv.appendChild(renderMatchup(match, side, roundIdx, matchIdx));
+        });
+
+        halfDiv.appendChild(roundDiv);
+      });
+
+      return halfDiv;
+    }
+
+    function renderCenter() {
+      const centerDiv = document.createElement('div');
+      centerDiv.className = 'center-column';
+
+      const champBox = document.createElement('div');
+      champBox.className = 'champion-box';
+      champBox.innerHTML = `
+        <h3>Champion</h3>
+        <div class="champion-name">${state.champion ? state.champion.name : '???'}</div>
+      `;
+
+      const finalsWrapper = document.createElement('div');
+      finalsWrapper.className = 'finals-wrapper';
+      
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'round-title';
+      titleDiv.innerText = 'Final';
+      finalsWrapper.appendChild(titleDiv);
+
+      const match = state.finals[0];
+      finalsWrapper.appendChild(renderMatchup(match, 'finals', 0, 0));
+
+      centerDiv.appendChild(champBox);
+      centerDiv.appendChild(finalsWrapper);
+
+      return centerDiv;
+    }
+
+    function drawConnectors() {
+      const svg = document.getElementById('connector-svg');
+      if (!svg) return;
+      
+      svg.innerHTML = '';
+      const container = document.getElementById('bracket');
+      const containerRect = container.getBoundingClientRect();
+
+      ['left', 'right'].forEach(side => {
+        const isLeft = side === 'left';
+
+        for (let r = 0; r < 3; r++) {
+          const roundMatches = container.querySelectorAll(`.matchup[data-side="${side}"][data-round="${r}"]`);
+          roundMatches.forEach((matchEl, mIdx) => {
+            const targetMatchIdx = Math.floor(mIdx / 2);
+            const targetEl = container.querySelector(`.matchup[data-side="${side}"][data-round="${r + 1}"][data-match="${targetMatchIdx}"]`);
+            if (!targetEl) return;
+
+            const r1 = matchEl.getBoundingClientRect();
+            const r2 = targetEl.getBoundingClientRect();
+
+            const x1 = isLeft ? (r1.right - containerRect.left) : (r1.left - containerRect.left);
+            const y1 = r1.top + r1.height / 2 - containerRect.top;
+
+            const x2 = isLeft ? (r2.left - containerRect.left) : (r2.right - containerRect.left);
+            const slotY = mIdx % 2 === 0 
+              ? (r2.top + r2.height * 0.25 - containerRect.top) 
+              : (r2.top + r2.height * 0.75 - containerRect.top);
+
+            const xMid = isLeft ? (x1 + (x2 - x1) / 2) : (x1 - (x1 - x2) / 2);
+
+            const pathStr = `M ${x1} ${y1} H ${xMid} V ${slotY} H ${x2}`;
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathStr);
+            path.setAttribute('stroke', 'var(--line-color)');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+          });
+        }
+
+        const e8El = container.querySelector(`.matchup[data-side="${side}"][data-round="3"][data-match="0"]`);
+        const finalsEl = container.querySelector(`.matchup[data-side="finals"][data-round="0"][data-match="0"]`);
+        if (e8El && finalsEl) {
+          const r1 = e8El.getBoundingClientRect();
+          const r2 = finalsEl.getBoundingClientRect();
+
+          const x1 = isLeft ? (r1.right - containerRect.left) : (r1.left - containerRect.left);
+          const y1 = r1.top + r1.height / 2 - containerRect.top;
+
+          const x2 = isLeft ? (r2.left - containerRect.left) : (r2.right - containerRect.left);
+          const slotY = isLeft 
+            ? (r2.top + r2.height * 0.25 - containerRect.top) 
+            : (r2.top + r2.height * 0.75 - containerRect.top);
+
+          const xMid = isLeft ? (x1 + (x2 - x1) / 2) : (x1 - (x1 - x2) / 2);
+
+          const pathStr = `M ${x1} ${y1} H ${xMid} V ${slotY} H ${x2}`;
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', pathStr);
+          path.setAttribute('stroke', 'var(--line-color)');
+          path.setAttribute('stroke-width', '2');
+          path.setAttribute('fill', 'none');
+          svg.appendChild(path);
+        }
+      });
+    }
+
+    function render() {
+      const container = document.getElementById('bracket');
+      container.innerHTML = '';
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.id = 'connector-svg';
+      container.appendChild(svg);
+
+      container.appendChild(renderHalf('left'));
+      container.appendChild(renderCenter());
+      container.appendChild(renderHalf('right'));
+
+      requestAnimationFrame(drawConnectors);
+    }
+
+    // Helper exposed to console to find teams easily
+    window.getTeam = function(actorName) {
+        const normalizedInput = actorName.trim().toLowerCase();
+        const allTeams = [...initialJSON.leftRegion, ...initialJSON.rightRegion];
+        return allTeams.find(team => team.name.toLowerCase() === normalizedInput) || null;
+    }
+
+    window.addEventListener('resize', drawConnectors);
+    initBracket();
+    
+    // --- CONSOLE USAGE EXAMPLES ---
+    // The bracket only advances when BOTH teams in a matchup have a vote count cast.
+    // You can pass the team object or just the exact string name:
+    
+    // vote('left', 0, 0, 'Willem Dafoe', 15); 
+    // vote('left', 0, 0, getTeam('Edward Norton'), 9); // Willem wins and advances!
+  </script>
+</body>
+</html>
