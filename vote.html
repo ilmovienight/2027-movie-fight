@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2027 IL Movie Nights Actor Smackdown</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-hover: #334155;
+      --accent-color: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.3);
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --line-color: #475569;
+      --winner-bg: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    header h1, header h1 a {
+      font-size: 2.2rem;
+      color: var(--accent-color);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px var(--accent-glow);
+      text-decoration: none;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    .bracket-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding: 60px 10px 20px; 
+    }
+
+    .bracket-container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      min-width: 1300px;
+      gap: 35px;
+      position: relative;
+    }
+
+    #connector-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .half-bracket {
+      display: flex;
+      gap: 35px;
+      flex: 1;
+      z-index: 1;
+    }
+
+    .half-bracket.left { flex-direction: row; }
+    .half-bracket.right { flex-direction: row-reverse; }
+
+    .round {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      flex: 1;
+      position: relative;
+      min-height: 650px;
+    }
+
+    .round-title {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* New Wrapper to stack the matchup card and the date */
+    .matchup-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin: 2px 0 5px;
+      z-index: 1;
+    }
+
+    .matchup {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .team {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      user-select: none;
+      transition: background-color 0.2s, color 0.2s;
+      min-height: 36px;
+    }
+
+    .team:first-child {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .team.winner {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .votes {
+      font-size: 0.75rem;
+      color: var(--accent-color);
+      font-weight: bold;
+      min-width: 32px;
+      text-align: center;
+      margin-right: 8px;
+    }
+
+    .name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Small print date below the matchup */
+    .match-date {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+    }
+
+    .center-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 200px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .champion-box {
+      position: absolute;
+      top: 0;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      border: 2px solid var(--accent-color);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      width: 100%;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .champion-box h3 {
+      font-size: 0.85rem;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .champion-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      min-height: 28px;
+    }
+
+    .finals-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    iframe {
+      width: 640px;
+      max-width: 100%;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1><a href="index.html">2027 IL Movie Nights Actor Smackdown</a></h1>
+    <p>The battle to be the featured actor for next year’s movie night!!</p>
+  </header>
+
+  <div class="form-container">
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeJ4pMJauhYDD5eWUSIKlwsWZLoyF4y9ahIWvTUGBZi6HaPrw/viewform?embedded=true"
+            height="600" frameborder="0" marginheight="0" marginwidth="0">
+      Loading...
+    </iframe>
+  </div>
+</body>
+</html>
