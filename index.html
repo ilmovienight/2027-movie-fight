@@ -237,11 +237,11 @@
     const initialJSON = {
       "leftRegion": [
         { "name": "Willem Dafoe" }, { "name": "Edward Norton" },
-        { "name": "Ryan Gosling" }, { "name": "Sam Jackson" },
+        { "name": "Ryan Gosling" }, { "name": "Samuel L. Jackson" },
         { "name": "George Clooney" }, { "name": "Matt Damon" },
         { "name": "Brad Pitt" }, { "name": "Denzel Washington" },
         { "name": "Danny DeVito" }, { "name": "Ewan McGregor" },
-        { "name": "Harrison Ford" }, { "name": "Leo DiCaprio" },
+        { "name": "Harrison Ford" }, { "name": "Leonardo DiCaprio" },
         { "name": "Nick Cage" }, { "name": "Robin Williams" },
         { "name": "Morgan Freeman" }, { "name": "Tom Cruise" }
       ],
@@ -375,6 +375,7 @@
         console.error("Team '" + teamName + "' not found in this matchup.");
         return;
       }
+      console.log(match.team1, match.team2);
 
       if (match.team1 && match.team2 && match.team1.votes !== undefined && match.team2.votes !== undefined) {
         if (match.team1.votes > match.team2.votes) {
@@ -464,7 +465,7 @@
           const votesDisplay = team.votes !== undefined ? team.votes : '-';
           teamDiv.innerHTML = `<span class="votes">${votesDisplay}</span><span class="name">${team.name}</span>`;
         } else {
-          teamDiv.innerHTML = `<span class="votes">-</span><span class="name" style="color:var(--text-muted)">TBD</span>`;
+          teamDiv.innerHTML = `<span class="votes">-</span><span class="name" style="color:var(--text-muted)"></span>`;
         }
         matchDiv.appendChild(teamDiv);
       });
@@ -479,7 +480,7 @@
       const dateDiv = document.createElement('div');
       dateDiv.className = 'match-date';
       dateDiv.innerText = dateText;
-      wrapper.appendChild(dateDiv);
+      //wrapper.appendChild(dateDiv);
 
       return wrapper;
     }
@@ -629,13 +630,43 @@
 
     window.addEventListener('resize', drawConnectors);
     initBracket();
+    vote('left', 0, 0, 'Willem Dafoe', 18);
+    vote('left', 0, 0, 'Edward Norton', 11);
+    vote('left', 0, 4, 'Danny DeVito', 15);
+    vote('left', 0, 4, 'Ewan McGregor', 14);
+    vote('right', 0, 0, 'Meryl Streep', 19);
+    vote('right', 0, 0, 'Cate Blanchett', 10);
+    vote('right', 0, 4, 'Frances McDormand', 11);
+    vote('right', 0, 4, 'Natalie Portman', 18);
     
-    // --- CONSOLE USAGE EXAMPLES ---
-    // The bracket only advances when BOTH teams in a matchup have a vote count cast.
-    // You can pass the team object or just the exact string name:
+    // Round 1 Votes
+    /*
+    vote('left', 0, 0, 'Ryan Gosling', );
+    vote('left', 0, 0, 'Sam Jackson', );
+    vote('left', 0, 0, 'George Clooney', );
+    vote('left', 0, 0, 'Matt Damon', );
+    vote('left', 0, 0, 'Brad Pitt', );
+    vote('left', 0, 0, 'Denzel Washington', );
+    vote('left', 0, 0, 'Harrison Ford', );
+    vote('left', 0, 0, 'Leo DiCaprio', );
+    vote('left', 0, 0, 'Nick Cage', );
+    vote('left', 0, 0, 'Robin Williams', );
+    vote('left', 0, 0, 'Morgan Freeman', );
+    vote('left', 0, 0, 'Tom Cruise" }', );
+    vote('right', 0, 0, 'Rachel McAdams', );
+    vote('right', 0, 0, 'Amy Adams', );
+    vote('right', 0, 0, 'Julianne Moore', );
+    vote('right', 0, 0, 'Emily Blunt', );
+    vote('right', 0, 0, 'Kirsten Dunst', );
+    vote('right', 0, 0, 'Glenn Close', );
+    vote('right', 0, 0, 'Toni Collette', );
+    vote('right', 0, 0, 'Emma Stone', );
+    vote('right', 0, 0, 'Anne Hathaway', );
+    vote('right', 0, 0, 'Laura Dern', );
+    vote('right', 0, 0, 'Julia Roberts', );
+    vote('right', 0, 0, 'Charlize Theron" }', );
+    */
     
-    // vote('left', 0, 0, 'Willem Dafoe', 15); 
-    // vote('left', 0, 0, getTeam('Edward Norton'), 9); // Willem wins and advances!
   </script>
 </body>
 </html>
