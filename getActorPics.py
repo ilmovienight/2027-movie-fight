@@ -1,6 +1,19 @@
 import os
 import re
+import time
 import requests
+
+
+def get_raw(session, url, **kwargs):
+    for attempt in range(6):
+        resp = session.get(url, **kwargs)
+        if resp.status_code == 429:
+            time.sleep(min(30, 2 ** attempt))
+            continue
+        resp.raise_for_status()
+        return resp
+    resp.raise_for_status()
+    return resp
 
 
 def clean_filename(name: str) -> str:
@@ -19,6 +32,11 @@ def get_infobox_image(text: str):
 
 
 def download_poster(title: str, session, output_dir: str) -> bool:
+    filepath = os.path.join(output_dir, f"{clean_filename(title)}.jpg")
+    if os.path.exists(filepath):
+        print(f"⏭️ Skip: {title} already exists")
+        return True
+
     api = "https://en.wikipedia.org/w/api.php"
 
     params = {
@@ -31,7 +49,7 @@ def download_poster(title: str, session, output_dir: str) -> bool:
         "formatversion": 2,
         "format": "json",
     }
-    data = session.get(api, params=params, timeout=30).json()
+    data = get_raw(session, api, params=params, timeout=30).json()
     page = data["query"]["pages"][0]
 
     if page.get("missing"):
@@ -54,7 +72,7 @@ def download_poster(title: str, session, output_dir: str) -> bool:
         "formatversion": 2,
         "format": "json",
     }
-    info_data = session.get(api, params=info_params, timeout=30).json()
+    info_data = get_raw(session, api, params=info_params, timeout=30).json()
     info_page = info_data["query"]["pages"][0]
     if "imageinfo" not in info_page:
         print(f"❌ Missing: no image info for '{filename}'")
@@ -63,18 +81,22 @@ def download_poster(title: str, session, output_dir: str) -> bool:
     file_info = info_page["imageinfo"][0]
     img_url = file_info.get("thumburl") or file_info["url"]
 
-    img_response = session.get(img_url, timeout=60)
-    img_response.raise_for_status()
+    img_response = get_raw(session, img_url, timeout=60)
 
-    filepath = os.path.join(output_dir, f"{clean_filename(title)}.jpg")
     with open(filepath, "wb") as f:
         f.write(img_response.content)
 
+    time.sleep(1)
     print(f"✅ Success: {title} -> {filepath}")
     return True
 
 
 def download_actor_photo(name: str, session, output_dir: str) -> bool:
+    filepath = os.path.join(output_dir, f"{clean_filename(name)}.jpg")
+    if os.path.exists(filepath):
+        print(f"⏭️ Skip: {name} already exists")
+        return True
+
     api = "https://en.wikipedia.org/w/api.php"
 
     params = {
@@ -86,7 +108,7 @@ def download_actor_photo(name: str, session, output_dir: str) -> bool:
         "formatversion": 2,
         "format": "json",
     }
-    data = session.get(api, params=params, timeout=30).json()
+    data = get_raw(session, api, params=params, timeout=30).json()
     page = data["query"]["pages"][0]
 
     if page.get("missing"):
@@ -97,13 +119,12 @@ def download_actor_photo(name: str, session, output_dir: str) -> bool:
         return False
 
     img_url = page["thumbnail"]["source"]
-    img_response = session.get(img_url, timeout=60)
-    img_response.raise_for_status()
+    img_response = get_raw(session, img_url, timeout=60)
 
-    filepath = os.path.join(output_dir, f"{clean_filename(name)}.jpg")
     with open(filepath, "wb") as f:
         f.write(img_response.content)
 
+    time.sleep(1)
     print(f"✅ Success: {name} -> {filepath}")
     return True
 
@@ -114,84 +135,73 @@ TMDB_POSTERS = {
 
 
 def download_tmdb_poster(title: str, poster_path: str, session, output_dir: str) -> bool:
-    url = f"https://media.themoviedb.org/t/p/w780/{poster_path}.jpg"
-    img_response = session.get(url, timeout=60)
-    img_response.raise_for_status()
-
     filepath = os.path.join(output_dir, f"{clean_filename(title)}.jpg")
+    if os.path.exists(filepath):
+        print(f"⏭️ Skip: {title} already exists")
+        return True
+
+    url = f"https://media.themoviedb.org/t/p/w780/{poster_path}.jpg"
+    img_response = get_raw(session, url, timeout=60)
+
     with open(filepath, "wb") as f:
         f.write(img_response.content)
 
+    time.sleep(1)
     print(f"✅ Success: {title} -> {filepath}")
     return True
 
 
 def main():
     movies = [
-        "Les Misérables (2012 film)",
-        "The Devil Wears Prada (film)",
-        "Ella Enchanted (film)",
-        "The Princess Diaries (film)",
-        "Interstellar (film)",
-        "Brokeback Mountain",
-        "Blue Velvet (film)",
-        "Jurassic Park (film)",
-        "Year of the Dog (film)",
-        "Marriage Story",
-        "Little Women (2019 film)",
-        "Is This Thing On?",
-        "A Quiet Place (film)",
-        "Edge of Tomorrow",
-        "Sicario (2015 film)",
-        "Into the Woods (2014 film)",
-        "The Smashing Machine (2025 film)",
-        "The Big Lebowski",
-        "Boogie Nights",
-        "The Fugitive (1993 film)",
-        "Safe (1995 film)",
-        "Hannibal (2001 film)",
-        "Children of Men",
-        "Good Will Hunting",
-        "Aladdin (1992 Disney film)",
-        "Mrs. Doubtfire",
-        "Dead Poets Society",
-        "Jumanji (film)",
-        "Flubber (film)",
-        "Moonstruck",
-        "Leaving Las Vegas",
-        "The Rock (film)",
-        "Raising Arizona",
-        "Lord of War",
-        "Valley Girl (1983 film)",
-        "Ocean's Eleven",
-        "Michael Clayton (film)",
-        "Fantastic Mr. Fox (film)",
-        "O Brother, Where Art Thou?",
         "Burn After Reading",
-        "Up in the Air (2009 film)",
-        "The Bourne Identity (2002 film)",
-        "The Departed",
-        "The Martian (film)",
-        "The Talented Mr. Ripley (film)",
+        "Inglourious Basterds",
+        "Fight Club (film)",
+        "Ocean's Eleven (film)",
+        "Seven (1995 film)",
+        "Moneyball (film)",
+        "Training Day (film)",
+        "Fences (film)",
+        "Remember the Titans",
+        "Mississippi Masala",
+        "Philadelphia (film)",
+        "Flight (2012 film)",
+        "Bruce Almighty (film)",
+        "The Shawshank Redemption",
+        "The Dark Knight (film)",
+        "Million Dollar Baby (film)",
+        "Lucky Number Slevin",
+        "101 Dalmatians (film)",
+        "Dangerous Liaisons",
+        "The Big Chill (film)",
+        "Tarzan (1999 film)",
+        "The Wife (2017 film)",
+        "Fatal Attraction",
+        "Pretty Woman (film)",
+        "Erin Brockovich (film)",
+        "Notting Hill (film)",
+        "Steel Magnolias",
+        "Hook (film)",
+        "Monster (2003 film)",
+        "Mad Max: Fury Road",
+        "The Italian Job (2003 film)",
+        "The Cider House Rules",
+        "Snow White and the Huntsman",
+        "Prometheus (2012 film)",
+        "Mission: Impossible (film)",
+        "Top Gun (film)",
+        "Jerry Maguire",
+        "Rain Man",
+        "A Few Good Men (film)",
+        "Magnolia (film)",
+        "Little Women (2019 film)",
+        "Spider-Man (2002 film)",
+        "Melancholia (2011 film)",
+        "Elizabethtown (film)",
+        "Kiki's Delivery Service",
+        "Jumanji (film)"
     ]
 
     actors = [
-        "George Clooney",
-        "Matt Damon",
-        "Nicolas Cage",
-        "Robin Williams",
-        "Julianne Moore",
-        "Emily Blunt",
-        "Anne Hathaway",
-        "Laura Dern",
-        "Brad Pitt",
-        "Denzel Washington",
-        "Morgan Freeman",
-        "Tom Cruise",
-        "Kirsten Dunst",
-        "Glenn Close",
-        "Julia Roberts",
-        "Charlize Theron",
     ]
 
     output_dir = "wikipedia_thumbnails"
